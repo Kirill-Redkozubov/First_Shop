@@ -13,7 +13,7 @@ from app.models.users import User as UserModel
 
 password_hash = PasswordHash.recommended()
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 1
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 outh2_scheme = OAuth2PasswordBearer(tokenUrl='users/token')
@@ -77,4 +77,13 @@ async def get_current_admin(current_user: UserModel = Depends(get_current_user))
     """
     if current_user.role != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only admin can perform this action")
+    return current_user
+
+
+async def get_current_buyer(current_user: UserModel = Depends(get_current_user)):
+    """
+    Проверяет, что пользователь имеет роль 'admin'.
+    """
+    if current_user.role != "buyer":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only buyer can create reviews")
     return current_user

@@ -3,11 +3,12 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy import select, update
 from app.auth import get_current_seller
-from app.schemas import Product as ProductSchema, ProductCreate
+from app.schemas import Product as ProductSchema, ProductCreate, Review
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db_depends import get_async_db
 from app.models import Product as ProductModel, Category as CategoryModel
 from app.models import User as UserModel
+from app.models import Review as ReviewModel
 
 
 
@@ -87,3 +88,11 @@ async def delete_product(product_id: int, current_user: current_seller, db: db_s
     await db.commit()
     await db.refresh(product)
     return product
+
+@router.get('/{product_id}/reviews', response_model=list[Review])
+async def get_reviews_by_product_id(product_id: int, db: db_session):
+    product = await db.scalar(select(ProductModel).where(ProductModel.id == product_id, ProductModel.is_active))
+    if not product:
+        raise HTTPException(status_code=404, detail='product not found')
+    reviews = await db.scalars(select(ReviewModel).where(ReviewModel.product_id == product.id, ReviewModel.is_active))
+    return reviews.all()

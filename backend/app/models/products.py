@@ -21,3 +21,5 @@ class Product(Base):
     seller_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     category: Mapped["Category"] = relationship(back_populates="products")  # New
     seller: Mapped['User'] = relationship(back_populates='products')
+    reviews: Mapped[list['Review']] = relationship(back_populates='product')
+    rating: Mapped[Decimal | None] = mapped_column(Numeric(3, 2), default=Decimal('0.00'))
